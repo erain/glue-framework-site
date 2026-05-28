@@ -6,8 +6,8 @@ interface Props {
   description: string;
 }
 const { title, description } = Astro.props;
-const ogImage = new URL("/og.png", Astro.site ?? "https://glue-framework.vercel.app").toString();
-const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://glue-framework.vercel.app").toString();
+const ogImage = new URL("/og.png", Astro.site ?? "https://glue-framework-site.vercel.app").toString();
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://glue-framework-site.vercel.app").toString();
 ---
 <!doctype html>
 <html lang="en">

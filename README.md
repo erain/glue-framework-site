@@ -55,7 +55,7 @@ Every push to `main` auto-deploys. PRs get preview URLs.
 
 Set `ASTRO_SITE` at deploy time if a custom domain lands (e.g.
 `ASTRO_SITE=https://glue.dev`). The default `astro.config.mjs` site is
-`https://glue-framework.vercel.app`.
+`https://glue-framework-site.vercel.app`.
 
 ## OG image
 
