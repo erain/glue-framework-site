@@ -1,0 +1,68 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const ogImage = new URL("/og.png", Astro.site ?? "https://glue-framework.vercel.app").toString();
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://glue-framework.vercel.app").toString();
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="glue — a Go agent framework." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="glue — a Go agent framework." />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <header class="border-b border-line bg-paper">
+      <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+        <a href="/" class="text-ink font-medium tracking-tight">glue</a>
+        <nav class="flex items-center gap-6 text-sm text-ink-soft">
+          <a href="#concepts" class="hover:text-ink">Concepts</a>
+          <a href="#build" class="hover:text-ink">Build</a>
+          <a href="#agents" class="hover:text-ink">Agents</a>
+          <a href="https://github.com/erain/glue" class="hover:text-ink" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+    </header>
+    <main class="flex-1">
+      <slot />
+    </main>
+    <footer class="border-t border-line mt-24">
+      <div class="max-w-3xl mx-auto px-6 py-10 text-sm text-ink-soft flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <a href="https://github.com/erain/glue" class="text-ink-soft hover:text-ink" rel="noopener">glue</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/blob/main/docs/building-agents.md" class="text-ink-soft hover:text-ink" rel="noopener">Guide</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/blob/main/docs/design.md" class="text-ink-soft hover:text-ink" rel="noopener">Design</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/blob/main/CHANGELOG.md" class="text-ink-soft hover:text-ink" rel="noopener">Changelog</a>
+          {" · "}
+          MIT
+        </div>
+        <div class="text-ink-muted">Inspired by <span class="text-ink-soft">pi-mono</span> and <span class="text-ink-soft">flue</span>.</div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", "Menlo", Consolas, "Liberation Mono", monospace;
+
+  --color-ink:        #0f172a;
+  --color-ink-soft:   #475569;
+  --color-ink-muted:  #94a3b8;
+  --color-line:       #e2e8f0;
+  --color-line-soft:  #f1f5f9;
+  --color-paper:      #ffffff;
+  --color-paper-soft: #fafafa;
+
+  --color-accent:        #6d28d9;
+  --color-accent-soft:   #ede9fe;
+  --color-accent-strong: #5b21b6;
+}
+
+html {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+code, pre, kbd {
+  font-family: var(--font-mono);
+}
+
+.prose-body p { color: var(--color-ink-soft); line-height: 1.65; }
+.prose-body p + p { margin-top: 1rem; }
+.prose-body ul { color: var(--color-ink-soft); line-height: 1.65; margin: 1rem 0; padding-left: 1.25rem; list-style: disc; }
+.prose-body li + li { margin-top: 0.35rem; }
+.prose-body a { color: var(--color-accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.prose-body a:hover { color: var(--color-accent-strong); }
+.prose-body strong { color: var(--color-ink); font-weight: 600; }
+
+pre {
+  background: var(--color-line-soft);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: 1rem 1.125rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+pre code { background: transparent; padding: 0; font-size: inherit; color: inherit; }
+:not(pre) > code {
+  background: var(--color-line-soft);
+  border: 1px solid var(--color-line);
+  border-radius: 5px;
+  padding: 0.1em 0.4em;
+  font-size: 0.875em;
+  color: var(--color-ink);
+}
+
+.section-num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-muted);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.section-rule { border-color: var(--color-line); }
+
+section[id] { scroll-margin-top: 5rem; }
+
+/* Capability card grid used on §04. */
+.cap-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+}
+@media (min-width: 640px) {
+  .cap-grid { grid-template-columns: 1fr 1fr; }
+}
+.cap-card {
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  padding: 1rem 1.125rem;
+  background: var(--color-paper);
+}
+.cap-card h3 {
+  color: var(--color-ink);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 0.35rem;
+}
+.cap-card p {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0;
+}

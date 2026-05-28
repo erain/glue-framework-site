@@ -1,0 +1,369 @@
+---
+import Base from "../layouts/Base.astro";
+import Section from "../components/Section.astro";
+
+const title = "glue — a Go agent framework";
+const description =
+  "glue is a small, provider-agnostic agent harness in Go — and the reference agents built on it. Codex / Gemini / NVIDIA / OpenRouter, typed tools, sqlite+FTS5 search, MCP, local daemon, channels.";
+
+const minimalAgentSnippet = `package main
+
+import (
+\t"context"
+\t"fmt"
+\t"log"
+
+\t"github.com/erain/glue"
+\t"github.com/erain/glue/providers/gemini"
+)
+
+func main() {
+\tctx := context.Background()
+
+\tagent := glue.NewAgent(glue.AgentOptions{
+\t\tProvider: gemini.New(gemini.Options{}), // reads GEMINI_API_KEY
+\t\tModel:    "gemini-2.5-flash",
+\t})
+
+\tsession, err := agent.Session(ctx, "demo")
+\tif err != nil {
+\t\tlog.Fatal(err)
+\t}
+
+\tresult, err := session.Prompt(ctx, "Reply with the single word: glue.")
+\tif err != nil {
+\t\tlog.Fatal(err)
+\t}
+\tfmt.Println(result.Text)
+}`;
+
+const turnFlow = `prompt ─▶ provider streams events ─▶ text? emit deltas
+                                  └─▶ tool calls? run tools, append, loop
+                                  └─▶ stop ─▶ return final text`;
+
+const standardFlagsSnippet = `import (
+\t"flag"
+\t"github.com/erain/glue/cli"
+)
+
+fs := flag.NewFlagSet("my-agent", flag.ContinueOnError)
+get := cli.RegisterStandardFlags(fs, nil)
+_ = fs.Parse(os.Args[1:])
+
+cfg := get() // cfg.Provider, cfg.Model, cfg.ID, cfg.Store, cfg.Work, cfg.MaxTurns`;
+
+const capabilities = [
+  {
+    title: "Four providers + failover",
+    body: "Codex (ChatGPT subscription), Gemini, NVIDIA build, OpenRouter. A driver-style registry + glue.WithFailover.",
+  },
+  {
+    title: "Typed tools",
+    body: "glue.NewTool[Args] decodes JSON into your Go type before the executor runs; failures surface as ErrorResult, not panics.",
+  },
+  {
+    title: "Subagents",
+    body: "glue.SubagentTool wraps a child Agent as a tool — fresh, isolated transcripts for delegated work.",
+  },
+  {
+    title: "Persistence + FTS5 search",
+    body: "stores/file for the simple default; stores/sqlite for cross-session recall via pure-Go FTS5.",
+  },
+  {
+    title: "Streaming",
+    body: "WithStreamWriter, WithToolLogger, Session.Subscribe — compose additively, never crowd each other out.",
+  },
+  {
+    title: "Skills & roles",
+    body: "AGENTS.md, .agents/skills/&lt;name&gt;/SKILL.md, and roles/*.md discovered from your WorkDir. Frontmatter sets model overrides.",
+  },
+  {
+    title: "Coding-agent bundle",
+    body: "read_file, write_file, edit_file, list_dir, find_files, grep, shell_exec, git_diff_branch — permission-gated where it matters.",
+  },
+  {
+    title: "MCP client",
+    body: "Consume Model Context Protocol servers (stdio / Streamable HTTP) as permission-gated glue.Tool values.",
+  },
+  {
+    title: "Local daemon + channels",
+    body: "glue serve / glue connect over HTTP+SSE. Telegram and other channels plug in as adapters in your agent package.",
+  },
+];
+---
+
+<Base title={title} description={description}>
+  <section class="border-b border-line bg-paper">
+    <div class="max-w-3xl mx-auto px-6 pt-20 pb-16 sm:pt-28 sm:pb-20">
+      <div class="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-xs font-medium text-accent-strong mb-7">
+        <span class="size-1.5 rounded-full bg-accent"></span>
+        Open source · Go · MIT
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-semibold tracking-tight text-ink leading-[1.1] mb-6">
+        Agent = Provider + Loop + Tools.
+        <br class="hidden sm:block" />
+        <span class="text-accent">In Go.</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-ink-soft leading-relaxed max-w-2xl mb-10">
+        <strong class="text-ink font-medium">glue</strong> is a small,
+        provider-agnostic agent harness — and the reference agents built
+        on it. A reusable loop, typed tools, four model providers, opt-in
+        persistence and search, all behind a small code-first API.
+      </p>
+      <div class="flex flex-wrap items-center gap-3 mb-8">
+        <a
+          href="https://github.com/erain/glue/blob/main/docs/building-agents.md"
+          class="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-strong transition-colors"
+          rel="noopener"
+        >
+          Read the guide
+          <span aria-hidden="true">→</span>
+        </a>
+        <a
+          href="https://github.com/erain/glue"
+          class="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2.5 text-sm font-medium text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
+          rel="noopener"
+        >
+          View on GitHub
+        </a>
+      </div>
+      <pre class="text-sm"><code>go get github.com/erain/glue</code></pre>
+      <div class="text-xs text-ink-muted tracking-wide mt-6">
+        Codex · Gemini · NVIDIA build · OpenRouter · MCP · sqlite + FTS5 · local daemon
+      </div>
+    </div>
+  </section>
+
+  <Section num="01" id="what" eyebrow="What it is" title="An agent loop, code-first, in Go.">
+    <p>
+      Most agent frameworks bundle a model, a chain DSL, a deploy target,
+      and a runtime opinion. glue separates concerns: a reusable
+      provider-agnostic loop, a small <code>Agent</code> /
+      <code>Session</code> API, four pluggable providers, and
+      ready-to-register tool bundles. The whole framework fits in your
+      head.
+    </p>
+    <p>
+      Inspired by <a href="https://github.com/badlogic/pi-mono" rel="noopener">pi-mono</a>
+      and <a href="https://flueframework.com" rel="noopener">flue</a>:
+      same conceptual shape, in Go. Single static binary, no runtime, no
+      Python/Node version manager, no Docker just to run an agent.
+    </p>
+    <p>
+      The architectural rule (<a href="https://github.com/erain/glue/blob/main/docs/adr/0005-foundation-expansion.md" rel="noopener">ADR-0005</a>):
+      every product concern enters glue only as an interface the host
+      fills in. Sandboxing, channels, scheduling, permission policy —
+      your code, not glue&rsquo;s. That&rsquo;s how the core stays small
+      while real agents grow on top of it.
+    </p>
+  </Section>
+
+  <Section num="02" id="minimal" tone="soft" eyebrow="A minimal agent" title="Provider, session, prompt.">
+    <pre><code>{minimalAgentSnippet}</code></pre>
+    <p>
+      The session keeps an in-memory transcript, so a second
+      <code>session.Prompt(...)</code> continues the conversation. Pass
+      <code>AgentOptions.Store</code> (e.g. <code>stores/file</code> or
+      <code>stores/sqlite</code>) and transcripts survive across processes.
+      Other providers — Codex, NVIDIA, OpenRouter — are one import away.
+    </p>
+  </Section>
+
+  <Section num="03" id="concepts" eyebrow="Concepts" title="Seven types, one loop.">
+    <p>Once these click, the rest is API surface:</p>
+    <ul>
+      <li><strong>Provider</strong> — a model backend that streams assistant events.</li>
+      <li><strong>Agent</strong> — provider, model, tools, store, work dir, roles. Built with <code>glue.NewAgent</code>.</li>
+      <li><strong>Session</strong> — a named conversation with its own transcript; driven with <code>session.Prompt</code>.</li>
+      <li><strong>Tool</strong> — a function the model can call. Defined with <code>glue.NewTool[Args]</code>.</li>
+      <li><strong>Store</strong> — where transcripts persist (<code>stores/file</code> or <code>stores/sqlite</code>). Optional.</li>
+      <li><strong>Skill</strong> / <strong>Role</strong> — Markdown-driven reusable instructions and named instruction profiles.</li>
+      <li><strong>loop</strong> — the engine: stream → run tools → append results → repeat until the model stops.</li>
+    </ul>
+    <p>Every <code>session.Prompt</code> runs the same flow:</p>
+    <pre><code>{turnFlow}</code></pre>
+  </Section>
+
+  <Section num="04" id="capabilities" tone="soft" eyebrow="What's in the box" title="Batteries included, nothing welded shut.">
+    <div class="cap-grid">
+      {capabilities.map((c) => (
+        <div class="cap-card">
+          <h3>{c.title}</h3>
+          <p set:html={c.body}></p>
+        </div>
+      ))}
+    </div>
+    <p class="mt-8">
+      Each capability is opt-in. The core <code>glue</code> package
+      doesn&rsquo;t import any provider, store, or tool by default —
+      adding them is an explicit <code>import</code> in your
+      <code>main.go</code>.
+    </p>
+  </Section>
+
+  <Section num="05" id="build" eyebrow="Build your own" title="From minimal to packaged, in one guide.">
+    <p>
+      The end-to-end guide walks you from a 15-line minimal agent to a
+      packaged, tested CLI in ten steps: typed tools, persistence,
+      streaming, project context, subagents, structured output,
+      multi-provider failover, packaging, and testing with a fake provider.
+    </p>
+    <p>
+      Agents that ship a binary share six standard flags
+      (<code>--provider</code>, <code>--model</code>, <code>--id</code>,
+      <code>--store</code>, <code>--work</code>, <code>--max-turns</code>):
+    </p>
+    <pre><code>{standardFlagsSnippet}</code></pre>
+    <div class="flex flex-wrap items-center gap-3 mt-8">
+      <a
+        href="https://github.com/erain/glue/blob/main/docs/building-agents.md"
+        class="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-strong transition-colors"
+        rel="noopener"
+      >
+        Read building-agents.md
+        <span aria-hidden="true">→</span>
+      </a>
+      <a
+        href="https://github.com/erain/glue/tree/main/examples/local-agent"
+        class="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2.5 text-sm font-medium text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
+        rel="noopener"
+      >
+        examples/local-agent
+      </a>
+    </div>
+  </Section>
+
+  <Section num="06" id="agents" tone="soft" eyebrow="Built on glue" title="Two reference agents, in real use.">
+    <div class="cap-grid">
+      <div class="cap-card">
+        <h3>glue-review</h3>
+        <p>
+          A free, local pre-push branch reviewer. Reads the diff against
+          <code>main</code>, deep-reads files when needed, and posts one
+          sticky GitHub comment per PR — a short headline, severity bullets,
+          and a fenced <code>```markdown</code> fix block downstream coding
+          agents (Claude Code, Codex, Cursor, Aider, …) paste in one step.
+          Runs as a CLI or a GitHub Action.
+        </p>
+        <p style="margin-top: 0.6rem;">
+          <a href="https://glue-review.vercel.app" rel="noopener">glue-review.vercel.app</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/tree/main/agents/glue-review" rel="noopener">GitHub</a>
+        </p>
+      </div>
+      <div class="cap-card">
+        <h3>peggy</h3>
+        <p>
+          A long-running personal-assistant agent: CLI, Telegram, and a
+          shared HTTP+SSE daemon; durable sqlite+FTS5 memory with curated
+          recall; opt-in local coding tools; MCP servers;
+          scheduled/proactive runs; per-channel permission tiers. The best
+          reference for a feature-rich agent built on glue.
+        </p>
+        <p style="margin-top: 0.6rem;">
+          <a href="https://github.com/erain/glue/tree/main/agents/peggy" rel="noopener">GitHub</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/issues/110" rel="noopener">Tracker #110</a>
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section num="07" id="status" eyebrow="Status" title="Pre-1.0, in active use.">
+    <p>
+      The harness is feature-complete for the <code>0.x</code> series and
+      powers the two reference agents above. The public <code>Agent</code>
+      / <code>Session</code> / <code>Tool</code> surface is stable in
+      practice; minor versions may still break API until
+      <code>1.0.0</code>. See <code>CHANGELOG.md</code>.
+    </p>
+    <p>
+      <a href="https://github.com/erain/glue" rel="noopener">GitHub</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/docs/building-agents.md" rel="noopener">Guide</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/docs/design.md" rel="noopener">Design</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/docs/adr/" rel="noopener">ADRs</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/issues/110" rel="noopener">Tracker</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a>
+    </p>
+  </Section>
+
+  <section id="faq" class="border-b border-line bg-paper-soft">
+    <div class="max-w-3xl mx-auto px-6 py-16 sm:py-20">
+      <div class="flex items-baseline gap-4 mb-3">
+        <span class="section-num">08</span>
+        <span class="text-xs uppercase tracking-wider text-ink-muted">FAQ</span>
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight text-ink mb-8 leading-snug">
+        Anticipated questions.
+      </h2>
+      <div class="space-y-7 prose-body text-base sm:text-[17px]">
+        <div>
+          <h3 class="text-ink font-semibold mb-2">How is glue different from flue?</h3>
+          <p>
+            Same conceptual shape — pi-mono-style reusable loop, small
+            core, real agents on top — but Go instead of TypeScript,
+            local-first (no platform fees), and shipped with reference
+            agents that exercise the long-running primitives (memory,
+            channels, scheduling, permissions) rather than just demoing
+            the loop.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-ink font-semibold mb-2">How is it different from langchaingo or other Go agent libraries?</h3>
+          <p>
+            glue is smaller and more opinionated. The whole framework
+            fits in your head: provider, loop, session, tool. There&rsquo;s
+            no chain DSL, no graph compiler, no hidden global state.
+            Trade-off: you write a little more glue (sorry) for the
+            orchestration you want, in plain Go.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-ink font-semibold mb-2">Why Go?</h3>
+          <p>
+            Single static binary. No runtime, no version managers, no
+            Docker just to run an agent. Deploys to anything that takes
+            a binary. Goroutines map cleanly to streaming + tool
+            execution.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-ink font-semibold mb-2">Is the Codex provider really supported?</h3>
+          <p>
+            It uses your ChatGPT-subscription auth via <code>codex login</code>,
+            not an OpenAI API key. Subscription-auth via third-party tools
+            is not formally documented by OpenAI; the provider is intended
+            for personal use. Other providers (Gemini, NVIDIA, OpenRouter)
+            use standard API keys.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-ink font-semibold mb-2">API stability?</h3>
+          <p>
+            Pre-1.0. The public <code>Agent</code> / <code>Session</code> /
+            <code>Tool</code> surface is stable in practice — it has
+            survived ~30 PRs without breaking changes — but we reserve the
+            right to break API on minor bumps until <code>1.0.0</code>.
+            See <code>CHANGELOG.md</code>.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-ink font-semibold mb-2">Do I need an API key?</h3>
+          <p>
+            Yes for the network providers (<code>GEMINI_API_KEY</code>,
+            <code>NVIDIA_API_KEY</code>, <code>OPENROUTER_API_KEY</code>).
+            The Codex provider uses <code>codex login</code>. The
+            <code>openrouter/free</code> meta-route can run free.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
