@@ -233,7 +233,7 @@ const capabilities = [
     </div>
   </Section>
 
-  <Section num="06" id="agents" tone="soft" eyebrow="Built on glue" title="Two reference agents, in real use.">
+  <Section num="06" id="agents" tone="soft" eyebrow="Built on glue" title="Three real agents, in daily use.">
     <div class="cap-grid">
       <div class="cap-card">
         <h3>glue-review</h3>
@@ -266,16 +266,32 @@ const capabilities = [
           <a href="https://github.com/erain/glue/issues/110" rel="noopener">Tracker #110</a>
         </p>
       </div>
+      <div class="cap-card">
+        <h3>the glue coding agent</h3>
+        <p>
+          The <code>glue</code> binary itself: an interactive terminal
+          coding agent (TUI, permission-gated tools, autonomous goal
+          loop, headless CI mode) on Gemini, a ChatGPT subscription, or
+          open-weight models. The framework&rsquo;s own daily driver.
+        </p>
+        <p style="margin-top: 0.6rem;">
+          <a href="https://glue-coding-agent-site.vercel.app" rel="noopener">glue-coding-agent-site.vercel.app</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/tree/main/cmd/glue" rel="noopener">GitHub</a>
+        </p>
+      </div>
     </div>
   </Section>
 
-  <Section num="07" id="status" eyebrow="Status" title="Pre-1.0, in active use.">
+  <Section num="07" id="status" eyebrow="Status" title="Pre-stability, in active use.">
     <p>
-      The harness is feature-complete for the <code>0.x</code> series and
-      powers the two reference agents above. The public <code>Agent</code>
-      / <code>Session</code> / <code>Tool</code> surface is stable in
-      practice; minor versions may still break API until
-      <code>1.0.0</code>. See <code>CHANGELOG.md</code>.
+      The harness powers the reference agents above and the
+      <code>glue</code> coding agent in daily use. The public
+      <code>Agent</code> / <code>Session</code> / <code>Tool</code>
+      surface is stable in practice, but minor versions may still break
+      API until a deliberate surface lock — see the
+      <a href="https://github.com/erain/glue/blob/main/docs/adr/0013-pre-1-0-stability-stance.md" rel="noopener">stability stance</a>
+      and <code>CHANGELOG.md</code>.
     </p>
     <p>
       <a href="https://github.com/erain/glue" rel="noopener">GitHub</a>
