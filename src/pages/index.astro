@@ -4,7 +4,7 @@ import Section from "../components/Section.astro";
 
 const title = "glue — a Go agent framework";
 const description =
-  "glue is a small, provider-agnostic agent harness in Go — and the reference agents built on it. Codex / Gemini / NVIDIA / OpenRouter, typed tools, sqlite+FTS5 search, MCP, local daemon, channels.";
+  "glue is a small, provider-agnostic agent harness in Go — and the coding agent built on it, which runs jobs locally or in AX sandboxes. Codex / DeepSeek / Gemini / NVIDIA / OpenRouter, typed tools, sqlite+FTS5 search, MCP, goal loop, local daemon.";
 
 const minimalAgentSnippet = `package main
 
@@ -22,7 +22,7 @@ func main() {
 
 \tagent := glue.NewAgent(glue.AgentOptions{
 \t\tProvider: gemini.New(gemini.Options{}), // reads GEMINI_API_KEY
-\t\tModel:    "gemini-2.5-flash",
+\t\tModel:    "gemini-3-flash-preview",
 \t})
 
 \tsession, err := agent.Session(ctx, "demo")
@@ -54,8 +54,8 @@ cfg := get() // cfg.Provider, cfg.Model, cfg.ID, cfg.Store, cfg.Work, cfg.MaxTur
 
 const capabilities = [
   {
-    title: "Four providers + failover",
-    body: "Codex (ChatGPT subscription), Gemini, NVIDIA build, OpenRouter. A driver-style registry + glue.WithFailover.",
+    title: "Five providers + failover",
+    body: "Codex (ChatGPT subscription), DeepSeek, Gemini, NVIDIA build, OpenRouter. A driver-style registry, a per-model capability catalog, and glue.WithFailover.",
   },
   {
     title: "Typed tools",
@@ -90,6 +90,10 @@ const capabilities = [
     body: "History hardening before every request, classified retries with overflow→compact recovery, loop guardrails, stall recovery, and a per-model capability registry — on by default, each with an opt-out.",
   },
   {
+    title: "Goal loop",
+    body: "Agent.PursueGoal: a planner writes a checklist, a maker works it, and a separate read-only checker verifies it against real evidence each iteration — with budgets, pause/resume, and developer guidance mid-run.",
+  },
+  {
     title: "Local daemon + channels",
     body: "glue serve / glue connect over HTTP+SSE. Telegram and other channels plug in as adapters in your agent package.",
   },
@@ -111,8 +115,10 @@ const capabilities = [
       <p class="text-lg sm:text-xl text-ink-soft leading-relaxed max-w-2xl mb-10">
         <strong class="text-ink font-medium">glue</strong> is a small,
         provider-agnostic agent harness — and the reference agents built
-        on it. A reusable loop, typed tools, four model providers, opt-in
-        persistence and search, all behind a small code-first API.
+        on it. A reusable loop, typed tools, five model providers, opt-in
+        persistence and search, all behind a small code-first API. Its
+        coding agent hands tasks to remote AX sandboxes and brings back
+        tested changes.
       </p>
       <div class="flex flex-wrap items-center gap-3 mb-8">
         <a
@@ -133,7 +139,7 @@ const capabilities = [
       </div>
       <pre class="text-sm"><code>go get github.com/erain/glue</code></pre>
       <div class="text-xs text-ink-muted tracking-wide mt-6">
-        Codex · Gemini · NVIDIA build · OpenRouter · MCP · sqlite + FTS5 · local daemon
+        Codex · DeepSeek · Gemini · NVIDIA build · OpenRouter · MCP · sqlite + FTS5 · goal loop · AX remote jobs
       </div>
     </div>
   </section>
@@ -143,7 +149,7 @@ const capabilities = [
       Most agent frameworks bundle a model, a chain DSL, a deploy target,
       and a runtime opinion. glue separates concerns: a reusable
       provider-agnostic loop, a small <code>Agent</code> /
-      <code>Session</code> API, four pluggable providers, and
+      <code>Session</code> API, five pluggable providers, and
       ready-to-register tool bundles. The whole framework fits in your
       head.
     </p>
@@ -169,7 +175,7 @@ const capabilities = [
       <code>session.Prompt(...)</code> continues the conversation. Pass
       <code>AgentOptions.Store</code> (e.g. <code>stores/file</code> or
       <code>stores/sqlite</code>) and transcripts survive across processes.
-      Other providers — Codex, NVIDIA, OpenRouter — are one import away.
+      Other providers — Codex, DeepSeek, NVIDIA, OpenRouter — are one import away.
     </p>
   </Section>
 
@@ -237,8 +243,27 @@ const capabilities = [
     </div>
   </Section>
 
-  <Section num="06" id="agents" tone="soft" eyebrow="Built on glue" title="Three real agents, in daily use.">
+  <Section num="06" id="agents" tone="soft" eyebrow="Built on glue" title="Two real agents, in daily use.">
     <div class="cap-grid">
+      <div class="cap-card">
+        <h3>the glue coding agent</h3>
+        <p>
+          The <code>glue</code> binary: an interactive terminal coding agent
+          (TUI, permission-gated tools, goal loop, headless CI mode) that can
+          also hand a task to an isolated <a href="https://github.com/google/ax" rel="noopener">AX</a>
+          sandbox with <code>glue --remote</code>. Close your laptop, get a
+          phone notification, answer its questions, run several attempts at
+          once, and pull tested changes back into your checkout. A job starts
+          in about three seconds.
+        </p>
+        <pre class="text-sm"><code>go install github.com/erain/glue/cmd/glue@latest
+glue --remote "Fix the flaky test" --verify "go test ./..."</code></pre>
+        <p style="margin-top: 0.6rem;">
+          <a href="https://github.com/erain/glue/blob/main/docs/remote-quickstart.md" rel="noopener">Five-minute quickstart</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/tree/main/cmd/glue" rel="noopener">GitHub</a>
+        </p>
+      </div>
       <div class="cap-card">
         <h3>glue-review</h3>
         <p>
@@ -253,35 +278,6 @@ const capabilities = [
           <a href="https://glue-review.vercel.app" rel="noopener">glue-review.vercel.app</a>
           {" · "}
           <a href="https://github.com/erain/glue/tree/main/agents/glue-review" rel="noopener">GitHub</a>
-        </p>
-      </div>
-      <div class="cap-card">
-        <h3>peggy</h3>
-        <p>
-          A long-running personal-assistant agent: CLI, Telegram, and a
-          shared HTTP+SSE daemon; durable sqlite+FTS5 memory with curated
-          recall; opt-in local coding tools; MCP servers;
-          scheduled/proactive runs; per-channel permission tiers. The best
-          reference for a feature-rich agent built on glue.
-        </p>
-        <p style="margin-top: 0.6rem;">
-          <a href="https://github.com/erain/glue/tree/main/agents/peggy" rel="noopener">GitHub</a>
-          {" · "}
-          <a href="https://github.com/erain/glue/issues/110" rel="noopener">Tracker #110</a>
-        </p>
-      </div>
-      <div class="cap-card">
-        <h3>the glue coding agent</h3>
-        <p>
-          The <code>glue</code> binary itself: an interactive terminal
-          coding agent (TUI, permission-gated tools, autonomous goal
-          loop, headless CI mode) on Gemini, a ChatGPT subscription, or
-          open-weight models. The framework&rsquo;s own daily driver.
-        </p>
-        <p style="margin-top: 0.6rem;">
-          <a href="https://glue-coding-agent-site.vercel.app" rel="noopener">glue-coding-agent-site.vercel.app</a>
-          {" · "}
-          <a href="https://github.com/erain/glue/tree/main/cmd/glue" rel="noopener">GitHub</a>
         </p>
       </div>
     </div>
@@ -306,7 +302,7 @@ const capabilities = [
       {" · "}
       <a href="https://github.com/erain/glue/blob/main/docs/adr/" rel="noopener">ADRs</a>
       {" · "}
-      <a href="https://github.com/erain/glue/issues/110" rel="noopener">Tracker</a>
+      <a href="https://github.com/erain/glue/issues/392" rel="noopener">Tracker</a>
       {" · "}
       <a href="https://github.com/erain/glue/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
       {" · "}
@@ -329,10 +325,10 @@ const capabilities = [
           <p>
             Same conceptual shape — pi-mono-style reusable loop, small
             core, real agents on top — but Go instead of TypeScript,
-            local-first (no platform fees), and shipped with reference
-            agents that exercise the long-running primitives (memory,
-            channels, scheduling, permissions) rather than just demoing
-            the loop.
+            local-first (no platform fees), and shipped with a real
+            coding agent that exercises the long-running primitives
+            (durable jobs, goal loop, permissions, remote sandboxes)
+            rather than just demoing the loop.
           </p>
         </div>
         <div>
@@ -360,25 +356,27 @@ const capabilities = [
             It uses your ChatGPT-subscription auth via <code>codex login</code>,
             not an OpenAI API key. Subscription-auth via third-party tools
             is not formally documented by OpenAI; the provider is intended
-            for personal use. Other providers (Gemini, NVIDIA, OpenRouter)
+            for personal use. Other providers (DeepSeek, Gemini, NVIDIA, OpenRouter)
             use standard API keys.
           </p>
         </div>
         <div>
           <h3 class="text-ink font-semibold mb-2">API stability?</h3>
           <p>
-            Pre-1.0. The public <code>Agent</code> / <code>Session</code> /
-            <code>Tool</code> surface is stable in practice — it has
-            survived ~30 PRs without breaking changes — but we reserve the
-            right to break API on minor bumps until <code>1.0.0</code>.
-            See <code>CHANGELOG.md</code>.
+            Releases are tagged on a <code>1.x</code> line (latest
+            <code>v1.13.0</code>), but the pre-stability stance still holds:
+            the public <code>Agent</code> / <code>Session</code> /
+            <code>Tool</code> surface is stable in practice, yet a minor
+            version may break API until a deliberate surface lock. Breaking
+            changes are always called out in <code>CHANGELOG.md</code>.
           </p>
         </div>
         <div>
           <h3 class="text-ink font-semibold mb-2">Do I need an API key?</h3>
           <p>
             Yes for the network providers (<code>GEMINI_API_KEY</code>,
-            <code>NVIDIA_API_KEY</code>, <code>OPENROUTER_API_KEY</code>).
+            <code>DEEPSEEK_API_KEY</code>, <code>NVIDIA_API_KEY</code>,
+            <code>OPENROUTER_API_KEY</code>).
             The Codex provider uses <code>codex login</code>. The
             <code>openrouter/free</code> meta-route can run free.
           </p>

@@ -33,8 +33,8 @@ code, pre, kbd {
 .prose-body p + p { margin-top: 1rem; }
 .prose-body ul { color: var(--color-ink-soft); line-height: 1.65; margin: 1rem 0; padding-left: 1.25rem; list-style: disc; }
 .prose-body li + li { margin-top: 0.35rem; }
-.prose-body a { color: var(--color-accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.prose-body a:hover { color: var(--color-accent-strong); }
+.prose-body a:not([class]) { color: var(--color-accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.prose-body a:not([class]):hover { color: var(--color-accent-strong); }
 .prose-body strong { color: var(--color-ink); font-weight: 600; }
 
 pre {
@@ -96,3 +96,7 @@ section[id] { scroll-margin-top: 5rem; }
   line-height: 1.55;
   margin: 0;
 }
+
+/* Let cards shrink to their grid column; long code scrolls inside the card. */
+.cap-card { min-width: 0; }
+.cap-card pre { overflow-x: auto; }
