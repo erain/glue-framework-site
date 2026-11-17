@@ -100,3 +100,37 @@ section[id] { scroll-margin-top: 5rem; }
 /* Let cards shrink to their grid column; long code scrolls inside the card. */
 .cap-card { min-width: 0; }
 .cap-card pre { overflow-x: auto; }
+
+/* Subpackage table. */
+.pkg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.pkg-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  background: var(--color-line-soft);
+  padding: 0.6rem 0.875rem;
+  border-bottom: 1px solid var(--color-line);
+}
+.pkg-table td {
+  padding: 0.65rem 0.875rem;
+  border-bottom: 1px solid var(--color-line);
+  vertical-align: top;
+  color: var(--color-ink-soft);
+  line-height: 1.5;
+}
+.pkg-table tr:last-child td {
+  border-bottom: none;
+}
+.pkg-table td:first-child {
+  white-space: nowrap;
+}

@@ -4,12 +4,13 @@ import Section from "../components/Section.astro";
 
 const title = "glue — a Go agent framework";
 const description =
-  "glue is a small, provider-agnostic agent harness in Go — and the coding agent built on it, which runs jobs locally or in AX sandboxes. Codex / DeepSeek / Gemini / NVIDIA / OpenRouter, typed tools, sqlite+FTS5 search, MCP, goal loop, local daemon.";
+  "glue is a small, provider-agnostic agent harness in Go — and the AX-first coding agent built on it. Gemini, Codex, DeepSeek, NVIDIA, and OpenRouter, typed tools, token-aware compaction, sqlite+FTS5 search, MCP, goal loop, and remote AX sandboxes.";
 
 const minimalAgentSnippet = `package main
 
 import (
 \t"context"
+\t"encoding/json"
 \t"fmt"
 \t"log"
 
@@ -17,25 +18,48 @@ import (
 \t"github.com/erain/glue/providers/gemini"
 )
 
+type cityArgs struct {
+\tCity string \`json:"city"\`
+}
+
 func main() {
 \tctx := context.Background()
+\tweather := glue.NewTool[cityArgs](
+\t\tglue.ToolSpec{
+\t\t\tName:        "weather",
+\t\t\tDescription: "Look up current weather for a city.",
+\t\t\tParameters:  json.RawMessage(\`{"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}\`),
+\t\t},
+\t\tfunc(_ context.Context, a cityArgs) (glue.ToolResult, error) {
+\t\t\treturn glue.TextResult("18C and sunny in " + a.City), nil
+\t\t},
+\t)
 
 \tagent := glue.NewAgent(glue.AgentOptions{
 \t\tProvider: gemini.New(gemini.Options{}), // reads GEMINI_API_KEY
 \t\tModel:    "gemini-3-flash-preview",
+\t\tTools:    []glue.Tool{weather},
 \t})
-
 \tsession, err := agent.Session(ctx, "demo")
 \tif err != nil {
 \t\tlog.Fatal(err)
 \t}
-
-\tresult, err := session.Prompt(ctx, "Reply with the single word: glue.")
+\tres, err := session.Prompt(ctx, "What's the weather in Toronto?")
 \tif err != nil {
 \t\tlog.Fatal(err)
 \t}
-\tfmt.Println(result.Text)
+\tfmt.Println(res.Text)
 }`;
+
+const subpackages = [
+  { pkg: "github.com/erain/glue", desc: "Public SDK: Agent, Session, Tool, Store, PursueGoal, WithFailover, SubagentTool." },
+  { pkg: ".../loop", desc: "Provider-agnostic streaming & tool-execution loop with HardenHistory and classified retries." },
+  { pkg: ".../providers/{gemini,codex,deepseek,nvidia,openrouter}", desc: "Model adapters, shared openaicompat transport, and per-model capability registry." },
+  { pkg: ".../stores/{file,sqlite}", desc: "Session persistence (sqlite adds pure-Go BM25 FTS5 cross-session search)." },
+  { pkg: ".../tools/{fs,git,shell,coding,mcp}", desc: "Workspace tools, self-repairing edit_file, head+tail shell_exec, and MCP client." },
+  { pkg: ".../jobs · .../daemon", desc: "Durable coding-job lifecycle (goal & interactive modes) and HTTP+SSE daemon." },
+  { pkg: ".../prompts · .../cli", desc: "Versioned embed.FS prompt catalog and standard CLI flags for agent binaries." },
+];
 
 const turnFlow = `prompt ─▶ provider streams events ─▶ text? emit deltas
                                   └─▶ tool calls? run tools, append, loop
@@ -90,12 +114,16 @@ const capabilities = [
     body: "History hardening before every request, classified retries with overflow→compact recovery, loop guardrails, stall recovery, and a per-model capability registry — on by default, each with an opt-out.",
   },
   {
-    title: "Goal loop",
-    body: "Agent.PursueGoal: a planner writes a checklist, a maker works it, and a separate read-only checker verifies it against real evidence each iteration — with budgets, pause/resume, and developer guidance mid-run.",
+    title: "Context compaction",
+    body: "SummarizingCompactor builds a structured state snapshot with a prompt-injection firewall and cumulative read/modified file ledger; KeepRecentTokens bounds the tail.",
   },
   {
-    title: "Local daemon + channels",
-    body: "glue serve / glue connect over HTTP+SSE. Telegram and other channels plug in as adapters in your agent package.",
+    title: "Goal loop (Planner → Maker → Checker)",
+    body: "Agent.PursueGoal decomposes objectives into a checklist, works each iteration in a fresh maker session, and audits evidence with an independent read-only checker.",
+  },
+  {
+    title: "Durable jobs, daemon & AX sandboxes",
+    body: "jobs.Manager + glue serve over HTTP+SSE, direct AX gVisor execution, 0-CPU idle suspend, two-way ntfy actions, Cloudflare Access gateway, and session teleport.",
   },
 ];
 ---
@@ -115,10 +143,11 @@ const capabilities = [
       <p class="text-lg sm:text-xl text-ink-soft leading-relaxed max-w-2xl mb-10">
         <strong class="text-ink font-medium">glue</strong> is a small,
         provider-agnostic agent harness — and the reference agents built
-        on it. A reusable loop, typed tools, five model providers, opt-in
-        persistence and search, all behind a small code-first API. Its
-        coding agent hands tasks to remote AX sandboxes and brings back
-        tested changes.
+        on it. A reusable loop, typed tools, five model providers, token-aware
+        compaction, and SQLite FTS5 search behind a small code-first API. Its
+        coding agent dispatches work to isolated AX sandboxes, answers from phone
+        lock-screen buttons, serves a Zero-Trust Cloudflare Access web UI, and
+        teleports tested code + context back into your checkout.
       </p>
       <div class="flex flex-wrap items-center gap-3 mb-8">
         <a
@@ -126,8 +155,15 @@ const capabilities = [
           class="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-strong transition-colors"
           rel="noopener"
         >
-          Read the guide
+          Read the SDK guide
           <span aria-hidden="true">→</span>
+        </a>
+        <a
+          href="https://glue-coding.vercel.app"
+          class="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2.5 text-sm font-medium text-ink hover:border-ink-soft transition-colors"
+          rel="noopener"
+        >
+          Coding Agent ↗
         </a>
         <a
           href="https://github.com/erain/glue"
@@ -137,9 +173,10 @@ const capabilities = [
           View on GitHub
         </a>
       </div>
-      <pre class="text-sm"><code>go get github.com/erain/glue</code></pre>
+      <pre class="text-sm"><code>go get github.com/erain/glue
+go install github.com/erain/glue/cmd/glue@latest</code></pre>
       <div class="text-xs text-ink-muted tracking-wide mt-6">
-        Codex · DeepSeek · Gemini · NVIDIA build · OpenRouter · MCP · sqlite + FTS5 · goal loop · AX remote jobs
+        Gemini · Codex · DeepSeek · OpenRouter · NVIDIA · MCP · sqlite + FTS5 · goal loop · AX sandboxes · Cloudflare Access
       </div>
     </div>
   </section>
@@ -192,6 +229,25 @@ const capabilities = [
     </ul>
     <p>Every <code>session.Prompt</code> runs the same flow:</p>
     <pre><code>{turnFlow}</code></pre>
+    <p class="mt-6">Module path: <code>github.com/erain/glue</code>. Key packages:</p>
+    <div class="overflow-x-auto">
+      <table class="pkg-table">
+        <thead>
+          <tr>
+            <th>Import</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          {subpackages.map((p) => (
+            <tr>
+              <td><code>{p.pkg}</code></td>
+              <td>{p.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   </Section>
 
   <Section num="04" id="capabilities" tone="soft" eyebrow="What's in the box" title="Batteries included, nothing welded shut.">
@@ -248,22 +304,26 @@ const capabilities = [
       <div class="cap-card">
         <h3>the glue coding agent</h3>
         <p>
-          The <code>glue</code> binary: an interactive terminal coding agent
-          (TUI, permission-gated tools, goal loop, headless CI mode) that can
-          also hand a task to an isolated <a href="https://github.com/google/ax" rel="noopener">AX</a>
-          sandbox with <code>glue --remote</code>. Close your laptop, get a
-          phone notification, answer its questions, run several attempts at
-          once, and pull tested changes back into your checkout. A job starts
-          in about three seconds.
+          The <code>glue</code> binary: an AX-first, remote-first coding agent
+          (interactive TUI, autonomous <code>/goal</code> loop, headless CI mode)
+          that dispatches uncommitted work to isolated <a href="https://github.com/google/ax" rel="noopener">AX</a>
+          gVisor sandboxes in ~3 seconds (<code>glue --remote --snapshot</code>).
+          Suspends to 0 CPU while waiting on <code>ntfy</code> phone lock-screen
+          action buttons, serves an opt-in Cloudflare Access browser workspace
+          (<code>glue remote setup</code>), and teleports tested code + session
+          context into your local TUI (<code>glue job teleport</code>).
         </p>
         <pre class="text-sm"><code>go install github.com/erain/glue/cmd/glue@latest
-glue --remote "Fix the flaky test" --verify "go test ./..."</code></pre>
+glue --remote "Fix retry race" --snapshot --verify "go test -race ./..."
+glue job teleport latest</code></pre>
         <p style="margin-top: 0.6rem;">
           <a href="https://glue-coding.vercel.app" rel="noopener">glue-coding.vercel.app</a>
           {" · "}
-          <a href="https://github.com/erain/glue/blob/main/docs/remote-quickstart.md" rel="noopener">Five-minute quickstart</a>
+          <a href="https://github.com/erain/glue/blob/main/docs/remote-quickstart.md" rel="noopener">Quickstart</a>
           {" · "}
-          <a href="https://github.com/erain/glue/tree/main/cmd/glue" rel="noopener">GitHub</a>
+          <a href="https://github.com/erain/glue/blob/main/docs/cli.md" rel="noopener">CLI &amp; TUI Guide</a>
+          {" · "}
+          <a href="https://github.com/erain/glue/tree/main/cmd/glue" rel="noopener">Source</a>
         </p>
       </div>
       <div class="cap-card">
@@ -298,17 +358,19 @@ glue --remote "Fix the flaky test" --verify "go test ./..."</code></pre>
     <p>
       <a href="https://github.com/erain/glue" rel="noopener">GitHub</a>
       {" · "}
-      <a href="https://github.com/erain/glue/blob/main/docs/building-agents.md" rel="noopener">Guide</a>
+      <a href="https://github.com/erain/glue/blob/main/docs/README.md" rel="noopener">Docs Index</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/docs/building-agents.md" rel="noopener">SDK Guide</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/docs/cli.md" rel="noopener">CLI Guide</a>
+      {" · "}
+      <a href="https://github.com/erain/glue/blob/main/docs/jobs.md" rel="noopener">Jobs Reference</a>
       {" · "}
       <a href="https://github.com/erain/glue/blob/main/docs/design.md" rel="noopener">Design</a>
       {" · "}
-      <a href="https://github.com/erain/glue/blob/main/docs/adr/" rel="noopener">ADRs</a>
-      {" · "}
-      <a href="https://github.com/erain/glue/issues/392" rel="noopener">Tracker</a>
+      <a href="https://github.com/erain/glue/tree/main/docs/adr" rel="noopener">ADRs</a>
       {" · "}
       <a href="https://github.com/erain/glue/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
-      {" · "}
-      <a href="https://github.com/erain/glue/blob/main/CONTRIBUTING.md" rel="noopener">Contributing</a>
     </p>
   </Section>
 
