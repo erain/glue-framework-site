@@ -37,10 +37,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://glue-framew
     <header class="border-b border-line bg-paper">
       <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
         <a href="/" class="text-ink font-medium tracking-tight">glue</a>
-        <nav class="flex items-center gap-6 text-sm text-ink-soft">
+        <nav class="flex items-center gap-4 sm:gap-6 text-sm text-ink-soft overflow-x-auto">
           <a href="#concepts" class="hover:text-ink">Concepts</a>
+          <a href="#capabilities" class="hover:text-ink">Capabilities</a>
           <a href="#build" class="hover:text-ink">Build</a>
           <a href="#agents" class="hover:text-ink">Agents</a>
+          <a href="https://glue-coding.vercel.app" class="hover:text-ink hidden sm:inline" rel="noopener">Coding Agent ↗</a>
           <a href="https://github.com/erain/glue" class="hover:text-ink" rel="noopener">GitHub</a>
         </nav>
       </div>
@@ -53,9 +55,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://glue-framew
         <div>
           <a href="https://github.com/erain/glue" class="text-ink-soft hover:text-ink" rel="noopener">glue</a>
           {" · "}
-          <a href="https://github.com/erain/glue/blob/main/docs/building-agents.md" class="text-ink-soft hover:text-ink" rel="noopener">Guide</a>
+          <a href="https://github.com/erain/glue/blob/main/docs/README.md" class="text-ink-soft hover:text-ink" rel="noopener">Docs</a>
           {" · "}
-          <a href="https://github.com/erain/glue/blob/main/docs/design.md" class="text-ink-soft hover:text-ink" rel="noopener">Design</a>
+          <a href="https://github.com/erain/glue/blob/main/docs/building-agents.md" class="text-ink-soft hover:text-ink" rel="noopener">SDK Guide</a>
+          {" · "}
+          <a href="https://glue-coding.vercel.app" class="text-ink-soft hover:text-ink" rel="noopener">Coding Agent</a>
           {" · "}
           <a href="https://github.com/erain/glue/blob/main/CHANGELOG.md" class="text-ink-soft hover:text-ink" rel="noopener">Changelog</a>
           {" · "}
